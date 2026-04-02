@@ -1,16 +1,16 @@
 platform :ios, '13.0'
 
-# Cette ligne est cruciale pour que Flutter fonctionne
-require_relative '../.flutter-plugins-dependencies'
-
 target 'Runner' do
   use_frameworks!
   use_modular_headers!
 
-  # Configuration standard de Flutter
-  flutter_root = File.expand_path('..', File.dirname(File.realpath(__FILE__)))
-  load File.join(flutter_root, 'packages', 'flutter_tools', 'bin', 'xcode_backend.dart')
-  
-  # On garde ta ligne mais elle a besoin du contexte Flutter
-  flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
+  # Configuration automatique simplifiée
+  post_install do |installer|
+    installer.pods_project.targets.each do |target|
+      flutter_additional_ios_build_settings(target)
+      target.build_configurations.each do |config|
+        config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '13.0'
+      end
+    end
+  end
 end
