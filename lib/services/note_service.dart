@@ -2,36 +2,45 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/note.dart';
 
 class NoteService {
-  // Référence à la collection "notes" dans Firestore
   final CollectionReference _notesCollection =
       FirebaseFirestore.instance.collection('notes');
 
-  /// Stream en temps réel de toutes les notes (triées par date décroissante)
   Stream<List<Note>> getNotes() {
     return _notesCollection
-        .orderBy('createdAt', descending: true)
         .snapshots()
         .map((snapshot) {
-      return snapshot.docs.map((doc) => Note.fromFirestore(doc)).toList();
+      final notes = snapshot.docs.map((doc) => Note.fromFirestore(doc)).toList();
+      // Trier: d'abord par order, sinon par date
+      notes.sort((a, b) {
+        if (a.order != 0 || b.order != 0) {
+          return a.order.compareTo(b.order);
+        }
+        return b.createdAt.compareTo(a.createdAt);
+      });
+      return notes;
     });
   }
 
-  /// Ajouter une nouvelle note
-  Future<void> addNote({
-    required String title,
-    required String content,
-  }) async {
-    final note = Note(
-      id: '',
-      title: title.trim(),
-      content: content.trim(),
-      createdAt: DateTime.now(),
-    );
-    await _notesCollection.add(note.toMap());
+  Future<void> addNote({required String title, required String content}) async {
+    final snapshot = await _notesCollection.get();
+    final order = snapshot.docs.length;
+    await _notesCollection.add({
+      'title': title.trim(),
+      'content': content.trim(),
+      'createdAt': Timestamp.fromDate(DateTime.now()),
+      'order': order,
+    });
   }
 
-  /// Supprimer une note par son ID
   Future<void> deleteNote(String id) async {
     await _notesCollection.doc(id).delete();
+  }
+
+  Future<void> reorderNotes(List<Note> notes) async {
+    final batch = FirebaseFirestore.instance.batch();
+    for (int i = 0; i < notes.length; i++) {
+      batch.update(_notesCollection.doc(notes[i].id), {'order': i});
+    }
+    await batch.commit();
   }
 }

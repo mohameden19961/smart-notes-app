@@ -17,19 +17,13 @@ import 'package:flutter/foundation.dart'
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {
-      throw UnsupportedError(
-        'DefaultFirebaseOptions have not been configured for web - '
-        'you can reconfigure this by running the FlutterFire CLI again.',
-      );
+      return web;
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
         return android;
       case TargetPlatform.iOS:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for ios - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return ios;
       case TargetPlatform.macOS:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for macos - '
@@ -59,4 +53,23 @@ class DefaultFirebaseOptions {
     projectId: 'smart-notes-abdy',
     storageBucket: 'smart-notes-abdy.firebasestorage.app',
   );
+
+  static const FirebaseOptions web = FirebaseOptions(
+    apiKey: 'AIzaSyDNSQ-HmWzqYypECBOowzlacCKp7DkhNgk',
+    appId: '1:317841869544:web:9731868e726a56869fd75d',
+    messagingSenderId: '317841869544',
+    projectId: 'smart-notes-abdy',
+    authDomain: 'smart-notes-abdy.firebaseapp.com',
+    storageBucket: 'smart-notes-abdy.firebasestorage.app',
+  );
+
+  static const FirebaseOptions ios = FirebaseOptions(
+    apiKey: 'AIzaSyC4Xp-D_gfCTrW8bg11Hz9K3ebgo086kHg',
+    appId: '1:317841869544:ios:f26435a751b436079fd75d',
+    messagingSenderId: '317841869544',
+    projectId: 'smart-notes-abdy',
+    storageBucket: 'smart-notes-abdy.firebasestorage.app',
+    iosBundleId: 'com.example.smartNotes',
+  );
+
 }

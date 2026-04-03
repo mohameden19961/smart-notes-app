@@ -5,15 +5,16 @@ class Note {
   final String title;
   final String content;
   final DateTime createdAt;
+  final int order;
 
   Note({
     required this.id,
     required this.title,
     required this.content,
     required this.createdAt,
+    this.order = 0,
   });
 
-  /// Créer une Note depuis un document Firestore
   factory Note.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
     return Note(
@@ -21,15 +22,16 @@ class Note {
       title: data['title'] ?? '',
       content: data['content'] ?? '',
       createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      order: data['order'] ?? 0,
     );
   }
 
-  /// Convertir une Note en Map pour Firestore
   Map<String, dynamic> toMap() {
     return {
       'title': title,
       'content': content,
       'createdAt': Timestamp.fromDate(createdAt),
+      'order': order,
     };
   }
 }
