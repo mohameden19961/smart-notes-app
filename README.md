@@ -24,6 +24,7 @@ Application mobile et web de gestion de notes développée avec **Flutter** et *
 ---
 
 ## 🗂️ Architecture du Projet
+```
 lib/
 ├── main.dart                  # Point d'entrée, init Firebase
 ├── firebase_options.dart      # Configuration Firebase (non versionné)
