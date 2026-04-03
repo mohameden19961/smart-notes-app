@@ -6,30 +6,33 @@ class NoteService {
       FirebaseFirestore.instance.collection('notes');
 
   Stream<List<Note>> getNotes() {
-    return _notesCollection
-        .snapshots()
-        .map((snapshot) {
+    return _notesCollection.snapshots().map((snapshot) {
       final notes = snapshot.docs.map((doc) => Note.fromFirestore(doc)).toList();
-      // Trier: d'abord par order, sinon par date
-      notes.sort((a, b) {
-        if (a.order != 0 || b.order != 0) {
-          return a.order.compareTo(b.order);
-        }
-        return b.createdAt.compareTo(a.createdAt);
-      });
+      notes.sort((a, b) => a.order.compareTo(b.order));
       return notes;
     });
   }
 
   Future<void> addNote({required String title, required String content}) async {
     final snapshot = await _notesCollection.get();
-    final order = snapshot.docs.length;
-    await _notesCollection.add({
+    
+    // Décaler toutes les notes existantes de +1
+    final batch = FirebaseFirestore.instance.batch();
+    for (final doc in snapshot.docs) {
+      final currentOrder = (doc.data() as Map<String, dynamic>)['order'] ?? 0;
+      batch.update(doc.reference, {'order': currentOrder + 1});
+    }
+    
+    // Ajouter la nouvelle note en position 0 (début)
+    final newNoteRef = _notesCollection.doc();
+    batch.set(newNoteRef, {
       'title': title.trim(),
       'content': content.trim(),
       'createdAt': Timestamp.fromDate(DateTime.now()),
-      'order': order,
+      'order': 0,
     });
+    
+    await batch.commit();
   }
 
   Future<void> deleteNote(String id) async {
